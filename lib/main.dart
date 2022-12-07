@@ -5,9 +5,9 @@ import 'package:grouped_list/grouped_list.dart';
 
 import 'package:vsb/v_add.dart';
 import 'package:vsb/v_conf.dart';
-import 'package:vsb/model.dart';
 import 'package:vsb/v_edit.dart';
 import 'package:vsb/utils.dart';
+import 'package:vsb/model.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override

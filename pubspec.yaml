@@ -1,5 +1,5 @@
 name: vsb
-description: A new Flutter project.
+description: A verysimple board project.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.

@@ -1,115 +1,201 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:grouped_list/grouped_list.dart';
+
+import 'package:vsb/v_add.dart';
+import 'package:vsb/v_conf.dart';
+import 'package:vsb/model.dart';
+import 'package:vsb/v_edit.dart';
+import 'package:vsb/utils.dart';
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
+}
 
 void main() {
+  HttpOverrides.global = MyHttpOverrides();
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: ((context) => AppModel()),
+        )
+      ],
+      child: MaterialApp(
+        theme: ThemeData(primarySwatch: Colors.amber),
+        debugShowCheckedModeBanner: false,
+        home: const Root(),
+        // routes: {
+        //   '/': (context) => const Root(),
+        //   '/conf': (context) => const ConfView(),
+        // },
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class Root extends StatefulWidget {
+  const Root({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<Root> createState() => _RootState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _RootState extends State<Root> {
+  int currentPage = 0;
+  AppModel? model;
+  @override
+  void initState() {
+    super.initState();
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+    model = context.read<AppModel>();
+    model!.loadCurrentApiServerUrlFromPrefs();
+  }
+
+  Widget showPage() {
+    switch (currentPage) {
+      case 1:
+        return const ConfView();
+      default:
+        AppModel m = context.read<AppModel>();
+
+        return Consumer<AppModel>(builder: ((context, value, child) {
+          return GroupedListView<dynamic, String>(
+            elements: m.proxyDigestList,
+            groupBy: (element) {
+              return element.isListen ? "监听" : "拨号";
+            },
+            groupSeparatorBuilder: (String groupByValue) => ListTile(
+              title: Container(
+                //color: Colors.white,
+                padding: const EdgeInsets.all(10.0),
+                decoration: cardDecoration,
+                child: Text(
+                  groupByValue,
+                ),
+              ),
+            ),
+            itemBuilder: (context, dynamic d) => ListTile(
+              tileColor: Colors.white,
+              leading: Text(d.fullprotocol,
+                  style: Theme.of(context).textTheme.bodyText1),
+              trailing: Text("#${d.tag}"),
+              title: Text(d.addr, style: Theme.of(context).textTheme.bodySmall),
+              onTap: () {
+                //debugPrint("${d.fullprotocol}");
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: ((context) => EditView(
+                          index: d.index,
+                          isListen: d.isListen,
+                        ))));
+              },
+            ),
+
+            useStickyGroupSeparators: true, // optional
+            floatingHeader: true, // optional
+            order: GroupedListOrder.ASC, // optional
+          );
+        }));
+    }
+  }
+
+  Widget? fla(context) {
+    if (currentPage == 0) {
+      return FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) {
+              return const AddView();
+            },
+          ));
+        },
+        child: const Icon(Icons.add),
+      );
+    }
+    return null;
+  }
+
+  void tryRestoreDefault() async {
+    var x = showDialog(
+        context: context,
+        builder: ((context) => AlertDialog(
+              title: const Text("提示"),
+              content: const Text("您确定要恢复默认设置吗?"),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text("取消"),
+                  onPressed: () => Navigator.of(context).pop(), // 关闭对话框
+                ),
+                TextButton(
+                  child: const Text("嗯, 恢复默认"),
+                  onPressed: () {
+                    //关闭对话框并返回true
+                    Navigator.of(context).pop(true);
+                  },
+                ),
+              ],
+            )));
+    bool? delete = await x;
+    if (delete == true) {
+      model!.restoreDefault();
+    }
+  }
+
+  List<Widget>? actionList() {
+    if (currentPage == 1) {
+      return [
+        IconButton(
+            icon: const Icon(Icons.restore),
+            onPressed: () {
+              tryRestoreDefault();
+            })
+      ];
+    } else if (currentPage == 0) {
+      return [
+        IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              model!.myfetchAllState();
+            })
+      ];
+    }
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: const Text("vs面板"),
+        actions: actionList(),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
+      floatingActionButton: fla(context),
+      body: showPage(),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.rocket), label: '代理'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: '配置'),
+        ],
+        currentIndex: currentPage,
+        onTap: (int value) {
+          setState(() {
+            currentPage = value;
+          });
+        },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

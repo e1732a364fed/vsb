@@ -1,16 +1,13 @@
 # vsb
 
-A new Flutter project.
+A verysimple board project.
 
-## Getting Started
+主页：显示目前所有proxy的状态, 点击进入编辑页面
 
-This project is a starting point for a Flutter application.
+编辑页面：
+1. 有一个删除按钮
 
-A few resources to get you started if this is your first Flutter project:
+配置页面：
+1. 配置verysimple的apiserver的url
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+FAB: 加号，添加新配置，可以自己配置生成，也可以扫码

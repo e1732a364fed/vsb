@@ -2,6 +2,10 @@
 
 A verysimple board project.
 
+理解：
+
+如果你用过aria2，那么vsb和verysimple的关系，就类似 ariaNG 和 aria2c 的关系
+
 ## 进展截图
 
 
@@ -20,3 +24,8 @@ A verysimple board project.
 1. 配置verysimple的apiserver的url
 
 FAB: 加号，添加新配置，可以自己配置生成，也可以扫码
+
+# 运行
+
+如果你运行web版的话，要注意，web版无法连接使用自签名证书的 vs api server，所以你只能用有效证书，或者使用-sunsafe参数运行 http明文api server
+

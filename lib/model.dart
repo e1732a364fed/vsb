@@ -31,6 +31,10 @@ enum FetchState {
 class AppModel with ChangeNotifier {
   String currentApiServerUrl = defaultApiUrl;
 
+  bool vpnMode = false;
+  String curDialConfStr = "";
+  String curScanedStr = "";
+
   List<ProxyDigest> proxyDigestList = [];
 
   String allstates = "";
@@ -40,15 +44,40 @@ class AppModel with ChangeNotifier {
   String deleteResult = "";
 
   bool addingUrlIsListen = false;
+  int curRequestScanSource = 0; //1 curDialConfStr;
 
   FetchState fetchingState = FetchState.ready;
   FetchState addingState = FetchState.ready;
   FetchState deleteState = FetchState.ready;
 
   static const String keyCurrentApiServerUrl = "currentApiServerUrl";
+  static const String keyIsVpnMode = "IsVpnMode";
+  static const String keyCurDialConfStr = "curDialConfStr";
+
+  void toggleVpnMode() async {
+    vpnMode = !vpnMode;
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool(keyIsVpnMode, vpnMode);
+  }
 
   void restoreDefault() {
     setCurrentApiServerUrl(defaultApiUrl);
+    setDialConfStr("");
+  }
+
+  void setCurScannedStr(String s) {
+    curScanedStr = s;
+
+    switch (curRequestScanSource) {
+      case 1:
+        setDialConfStr(s);
+        break;
+      default:
+        notifyListeners();
+    }
+    curRequestScanSource = 0;
   }
 
   void setCurrentApiServerUrl(String s) async {
@@ -59,10 +88,24 @@ class AppModel with ChangeNotifier {
     prefs.setString(keyCurrentApiServerUrl, s);
   }
 
-  void loadCurrentApiServerUrlFromPrefs() async {
+  void setDialConfStr(String s) async {
+    curDialConfStr = s;
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString(keyCurDialConfStr, s);
+  }
+
+  void loadPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     currentApiServerUrl =
         prefs.getString(keyCurrentApiServerUrl) ?? defaultApiUrl;
+
+    curDialConfStr = prefs.getString(keyCurDialConfStr) ?? "";
+
+    vpnMode = prefs.getBool(keyIsVpnMode) ?? false;
+
+    notifyListeners();
   }
 
   void myfetchAllState() async {

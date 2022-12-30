@@ -8,6 +8,8 @@ import 'package:vsb/v_conf.dart';
 import 'package:vsb/v_edit.dart';
 import 'package:vsb/utils.dart';
 import 'package:vsb/model.dart';
+import 'package:vsb/v_vpnPage.dart';
+import 'package:vsb/vpn.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -62,74 +64,88 @@ class _RootState extends State<Root> {
     super.initState();
 
     model = context.read<AppModel>();
-    model!.loadCurrentApiServerUrlFromPrefs();
+    model!.loadPrefs();
   }
 
-  Widget showPage() {
+  Widget showDefaultApiPage() {
+    AppModel m = model!;
+
+    return Consumer<AppModel>(builder: ((context, value, child) {
+      return GroupedListView<dynamic, String>(
+        elements: m.proxyDigestList,
+        groupBy: (element) {
+          return element.isListen ? "监听" : "拨号";
+        },
+        groupSeparatorBuilder: (String groupByValue) => ListTile(
+          title: Container(
+            //color: Colors.white,
+            padding: const EdgeInsets.all(10.0),
+            decoration: cardDecoration,
+            child: Text(
+              groupByValue,
+            ),
+          ),
+        ),
+        itemBuilder: (context, dynamic d) => ListTile(
+          tileColor: Colors.white,
+          leading: Text(d.fullprotocol,
+              style: Theme.of(context).textTheme.bodyText1),
+          trailing: Text("#${d.tag}"),
+          title: Text(d.addr, style: Theme.of(context).textTheme.bodySmall),
+          onTap: () {
+            //debugPrint("${d.fullprotocol}");
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: ((context) => EditView(
+                      index: d.index,
+                      isListen: d.isListen,
+                    ))));
+          },
+        ),
+
+        useStickyGroupSeparators: true, // optional
+        floatingHeader: true, // optional
+        order: GroupedListOrder.ASC, // optional
+      );
+    }));
+  }
+
+  Widget showPage(AppModel model) {
     switch (currentPage) {
       case 1:
         return const ConfView();
       default:
-        AppModel m = context.read<AppModel>();
-
-        return Consumer<AppModel>(builder: ((context, value, child) {
-          return GroupedListView<dynamic, String>(
-            elements: m.proxyDigestList,
-            groupBy: (element) {
-              return element.isListen ? "监听" : "拨号";
-            },
-            groupSeparatorBuilder: (String groupByValue) => ListTile(
-              title: Container(
-                //color: Colors.white,
-                padding: const EdgeInsets.all(10.0),
-                decoration: cardDecoration,
-                child: Text(
-                  groupByValue,
-                ),
-              ),
-            ),
-            itemBuilder: (context, dynamic d) => ListTile(
-              tileColor: Colors.white,
-              leading: Text(d.fullprotocol,
-                  style: Theme.of(context).textTheme.bodyText1),
-              trailing: Text("#${d.tag}"),
-              title: Text(d.addr, style: Theme.of(context).textTheme.bodySmall),
-              onTap: () {
-                //debugPrint("${d.fullprotocol}");
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: ((context) => EditView(
-                          index: d.index,
-                          isListen: d.isListen,
-                        ))));
-              },
-            ),
-
-            useStickyGroupSeparators: true, // optional
-            floatingHeader: true, // optional
-            order: GroupedListOrder.ASC, // optional
-          );
-        }));
+        if (model.vpnMode) {
+          return const VpnPage();
+        } else {
+          return showDefaultApiPage();
+        }
     }
   }
 
-  Widget? fla(context) {
+  Widget? fla(context, AppModel model) {
     if (currentPage == 0) {
       return FloatingActionButton(
         onPressed: () {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) {
-              return const AddView();
-            },
-          ));
+          if (model.vpnMode) {
+            startVpn();
+          } else {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) {
+                return const AddView();
+              },
+            ));
+          }
         },
-        child: const Icon(Icons.add),
+        child: model.vpnMode
+            ? const Icon(Icons.vpn_key_sharp)
+            : const Icon(Icons.add),
       );
     }
     return null;
   }
 
   void tryRestoreDefault() async {
-    var x = showDialog(
+    var userAnswer = showDialog(
         context: context,
         builder: ((context) => AlertDialog(
               title: const Text("提示"),
@@ -148,7 +164,7 @@ class _RootState extends State<Root> {
                 ),
               ],
             )));
-    bool? delete = await x;
+    bool? delete = await userAnswer;
     if (delete == true) {
       model!.restoreDefault();
     }
@@ -177,13 +193,19 @@ class _RootState extends State<Root> {
 
   @override
   Widget build(BuildContext context) {
+    AppModel model = context.read<AppModel>();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("vs面板"),
+        title: Consumer<AppModel>(builder: ((context, value, child) {
+          return Text(model.vpnMode ? "verysimple" : "vs面板");
+        })),
         actions: actionList(),
       ),
-      floatingActionButton: fla(context),
-      body: showPage(),
+      floatingActionButton: fla(context, model),
+      body: Consumer<AppModel>(builder: ((context, value, child) {
+        return showPage(model);
+      })),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.rocket), label: '代理'),

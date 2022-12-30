@@ -41,6 +41,7 @@ dependencies:
   shared_preferences: ^2.0.15
   provider: ^6.0.4
   grouped_list: ^5.1.2
+  mobile_scanner: ^2.1.0
 
 dev_dependencies:
   flutter_test:

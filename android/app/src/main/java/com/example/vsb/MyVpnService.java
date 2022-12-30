@@ -26,6 +26,26 @@ public class MyVpnService extends VpnService {
         String dialConfStr = intent.getStringExtra("dialConfStr");
         Log.w("vs: dialConfStr", dialConfStr);
         this.dialConfStr = dialConfStr;
+
+        // onStartCommand 在 onCreate 后运行, 此时m已经被初始化.
+
+        try {
+            m.hotLoadListenUrl("tun://" + tun.getFd(), 1);
+        } catch (Exception e) {
+            Log.w("vs start Exception", e.toString());
+        }
+
+        try {
+            m.hotLoadDialConfStr(dialConfStr);
+        } catch (Exception e) {
+            Log.w("vs start Exception", e.toString());
+        }
+
+        Log.w("vs", "start()");
+
+        m.start();
+        m.easyPrintState();
+
         return START_STICKY;
     }
 
@@ -50,22 +70,8 @@ public class MyVpnService extends VpnService {
 
         m = new M();
 
-        Log.w("vs", "start()");
+        Log.w("vs", "will start()");
 
-        try {
-            m.hotLoadListenUrl("tun://" + tun.getFd(), 1);
-        } catch (Exception e) {
-            Log.w("vs start Exception", e.toString());
-        }
-
-        try {
-            m.hotLoadDialConfStr(dialConfStr);
-        } catch (Exception e) {
-            Log.w("vs start Exception", e.toString());
-        }
-
-        m.start();
-        m.easyPrintState();
     }
 
     @Override

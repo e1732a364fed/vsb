@@ -127,7 +127,7 @@ class _RootState extends State<Root> {
       return FloatingActionButton(
         onPressed: () {
           if (model.vpnMode) {
-            startVpn();
+            passDialConfStrToVpnAndStart(model.curDialConfStr);
           } else {
             Navigator.of(context).push(MaterialPageRoute(
               builder: (context) {
@@ -202,7 +202,11 @@ class _RootState extends State<Root> {
         })),
         actions: actionList(),
       ),
-      floatingActionButton: fla(context, model),
+      floatingActionButton:
+          Consumer<AppModel>(builder: ((context, value, child) {
+        var x = fla(context, model);
+        return x ?? Container();
+      })),
       body: Consumer<AppModel>(builder: ((context, value, child) {
         return showPage(model);
       })),

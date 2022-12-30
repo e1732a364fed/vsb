@@ -17,15 +17,12 @@ import android.net.VpnService
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "samples.flutter.dev/battery"
 
-     var dialConfStr = ""
-
+    var dialConfStr = ""
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
     super.configureFlutterEngine(flutterEngine)
     MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
       call, result ->
-      // This method is invoked on the main thread.
-      // TODO
 
       when (call.method) {
         "getBatteryLevel" -> {
@@ -34,7 +31,7 @@ class MainActivity: FlutterActivity() {
           "setDialConfStr"->{
 
               dialConfStr = (call.argument("text") as? String).toString();
-              Log.w("vss",dialConfStr)
+              Log.w("vs, set dialConfStr",dialConfStr)
 
               result.success(0)
 
@@ -52,7 +49,7 @@ class MainActivity: FlutterActivity() {
 
             val intent = VpnService.prepare(this)
             if (intent != null) {
-               Log.w("shit","no permission")
+               Log.w("vshit","no permission, try get.")
                 startActivityForResult(intent,0)
             } else {
                 service1.run()

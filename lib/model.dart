@@ -88,6 +88,7 @@ class AppModel with ChangeNotifier {
     prefs.setString(keyCurrentApiServerUrl, s);
   }
 
+  //set and save to pref
   void setDialConfStr(String s) async {
     curDialConfStr = s;
     notifyListeners();

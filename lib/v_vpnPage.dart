@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vsb/model.dart';
-import 'package:vsb/vpn.dart';
 import 'package:vsb/v_scan.dart';
 
 class VpnPage extends StatefulWidget {
@@ -43,13 +42,13 @@ class _VpnPageState extends State<VpnPage> {
                 model.setDialConfStr(urlTextCtrl.text);
               }),
               child: const Text("save")),
-          Consumer<AppModel>(builder: ((context, value, child) {
-            return ElevatedButton(
-                onPressed: (() {
-                  passDialConfStrToVpn(model.curDialConfStr);
-                }),
-                child: const Text("passDialConfStr"));
-          })),
+          // Consumer<AppModel>(builder: ((context, value, child) {
+          //   return ElevatedButton(
+          //       onPressed: (() {
+          //         passDialConfStrToVpn(model.curDialConfStr);
+          //       }),
+          //       child: const Text("passDialConfStr"));
+          // })),
         ],
       ),
     );

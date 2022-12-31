@@ -22,13 +22,10 @@ class MainActivity: FlutterActivity() {
       call, result ->
 
       when (call.method) {
-        // "getBatteryLevel" -> {
-        //     result.success(3)
-        // }
           "setDialConfStr"->{
 
               dialConfStr = (call.argument("text") as? String).toString();
-              Log.w("vs, set dialConfStr",dialConfStr)
+              //Log.w("vs, set dialConfStr",dialConfStr)
 
               result.success(0)
 
@@ -53,6 +50,22 @@ class MainActivity: FlutterActivity() {
             }
 
             result.success(0)
+        }
+        "stop"->{
+            Log.w("vs", "stopping 1")
+
+            //stopService 方式对VpnService没用
+
+            //var intent = Intent(this, MyVpnService::class.java)
+            //stopService(intent);
+
+
+            var intent = Intent();
+            intent.setAction("ffffffffffffffffffffffff");
+            intent.putExtra("isdown", 1);
+             sendBroadcast(intent);
+
+            result.success(0);
         }
     }
 

@@ -4,8 +4,14 @@ import 'package:flutter/services.dart';
 
 const methodChannel1 = MethodChannel('vsb.e1732a364fed.github/channel1');
 
-Future<void> startVpn() async {
+Future<bool> startVpn() async {
   await methodChannel1.invokeMethod('start');
+
+  return true;
+}
+
+Future<void> stopVpn() async {
+  await methodChannel1.invokeMethod('stop');
 
   return;
 }
@@ -18,11 +24,11 @@ Future<void> passDialConfStrToVpn(String dialConf) async {
 }
 
 //helper func, call both
-Future<void> passDialConfStrToVpnAndStart(String dialConf) async {
+Future<bool> passDialConfStrToVpnAndStart(String dialConf) async {
   await passDialConfStrToVpn(dialConf);
-  await startVpn();
+  var r = await startVpn();
 
-  return;
+  return r;
 }
 
 String filterDialConfStr(String dialConf) {

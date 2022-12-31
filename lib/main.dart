@@ -8,8 +8,7 @@ import 'package:vsb/v_conf.dart';
 import 'package:vsb/v_edit.dart';
 import 'package:vsb/utils.dart';
 import 'package:vsb/model.dart';
-import 'package:vsb/v_vpnPage.dart';
-import 'package:vsb/vpn.dart';
+import 'package:vsb/v_vpn.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -122,12 +121,20 @@ class _RootState extends State<Root> {
     }
   }
 
-  Widget? fla(context, AppModel model) {
+  Color getFlaBgColor(context, AppModel model) {
+    if (model.vpnMode) {
+      return (model.vpnRunning) ? Colors.green : Colors.grey;
+    }
+    return Theme.of(context).backgroundColor;
+  }
+
+  Widget? fab(context, AppModel model) {
     if (currentPage == 0) {
       return FloatingActionButton(
+        backgroundColor: getFlaBgColor(context, model),
         onPressed: () {
           if (model.vpnMode) {
-            passDialConfStrToVpnAndStart(model.curDialConfStr);
+            model.toggleVpn();
           } else {
             Navigator.of(context).push(MaterialPageRoute(
               builder: (context) {
@@ -204,7 +211,7 @@ class _RootState extends State<Root> {
       ),
       floatingActionButton:
           Consumer<AppModel>(builder: ((context, value, child) {
-        var x = fla(context, model);
+        var x = fab(context, model);
         return x ?? Container();
       })),
       body: Consumer<AppModel>(builder: ((context, value, child) {

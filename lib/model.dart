@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vsb/api.dart';
+import 'package:vsb/vpn.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProxyDigest {
@@ -32,6 +33,7 @@ class AppModel with ChangeNotifier {
   String currentApiServerUrl = defaultApiUrl;
 
   bool vpnMode = false;
+  bool vpnRunning = false;
   String curDialConfStr = "";
   String curScanedStr = "";
 
@@ -212,6 +214,23 @@ class AppModel with ChangeNotifier {
       deleteResult = e.toString();
       deleteState = FetchState.error;
       notifyListeners();
+    }
+  }
+
+  Future<void> toggleVpn() async {
+    if (vpnRunning) {
+      await stopVpn();
+      vpnRunning = false;
+
+      notifyListeners();
+      return;
+    } else {
+      var ok = await passDialConfStrToVpnAndStart(curDialConfStr);
+      if (ok) {
+        vpnRunning = true;
+
+        notifyListeners();
+      }
     }
   }
 }

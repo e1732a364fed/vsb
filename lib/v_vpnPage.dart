@@ -39,7 +39,7 @@ class _VpnPageState extends State<VpnPage> {
           })),
           ElevatedButton(
               onPressed: (() {
-                model.setDialConfStr(urlTextCtrl.text);
+                model.saveDialConfStr(urlTextCtrl.text);
               }),
               child: const Text("save")),
           // Consumer<AppModel>(builder: ((context, value, child) {

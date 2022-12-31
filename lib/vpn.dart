@@ -2,21 +2,22 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
-const platform = MethodChannel('samples.flutter.dev/battery');
+const methodChannel1 = MethodChannel('vsb.e1732a364fed.github/channel1');
 
 Future<void> startVpn() async {
-  await platform.invokeMethod('start');
+  await methodChannel1.invokeMethod('start');
 
   return;
 }
 
 Future<void> passDialConfStrToVpn(String dialConf) async {
-  await platform
+  await methodChannel1
       .invokeMethod('setDialConfStr', {"text": filterDialConfStr(dialConf)});
 
   return;
 }
 
+//helper func, call both
 Future<void> passDialConfStrToVpnAndStart(String dialConf) async {
   await passDialConfStrToVpn(dialConf);
   await startVpn();

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vsb/model.dart';
-import 'package:vsb/vpn.dart';
 
 class ConfView extends StatefulWidget {
   const ConfView({super.key});
@@ -41,9 +40,6 @@ class _ConfViewState extends State<ConfView> {
     return Column(
       children: [
         Consumer<AppModel>(builder: ((context, value, child) {
-          return Container();
-        })),
-        Consumer<AppModel>(builder: ((context, value, child) {
           return Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextFormField(
@@ -70,10 +66,6 @@ class _ConfViewState extends State<ConfView> {
                 model.toggleVpnMode();
               },
               child: Text(model.vpnMode ? "转为面板模式" : "转为vpn模式"));
-        })),
-        Consumer<AppModel>(builder: ((context, value, child) {
-          return const ElevatedButton(
-              onPressed: startVpn, child: Text("start"));
         })),
       ],
     );

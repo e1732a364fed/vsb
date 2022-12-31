@@ -64,7 +64,7 @@ class AppModel with ChangeNotifier {
 
   void restoreDefault() {
     setCurrentApiServerUrl(defaultApiUrl);
-    setDialConfStr("");
+    saveDialConfStr("");
   }
 
   void setCurScannedStr(String s) {
@@ -72,7 +72,7 @@ class AppModel with ChangeNotifier {
 
     switch (curRequestScanSource) {
       case 1:
-        setDialConfStr(s);
+        saveDialConfStr(s);
         break;
       default:
         notifyListeners();
@@ -89,7 +89,7 @@ class AppModel with ChangeNotifier {
   }
 
   //set and save to pref
-  void setDialConfStr(String s) async {
+  void saveDialConfStr(String s) async {
     curDialConfStr = s;
     notifyListeners();
 

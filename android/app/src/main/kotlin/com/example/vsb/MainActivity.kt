@@ -11,11 +11,8 @@ import android.util.Log
 import android.net.VpnService
 
 
-
-
-
 class MainActivity: FlutterActivity() {
-    private val CHANNEL = "samples.flutter.dev/battery"
+    private val CHANNEL = "vsb.e1732a364fed.github/channel1"
 
     var dialConfStr = ""
 
@@ -25,9 +22,9 @@ class MainActivity: FlutterActivity() {
       call, result ->
 
       when (call.method) {
-        "getBatteryLevel" -> {
-            result.success(3)
-        }
+        // "getBatteryLevel" -> {
+        //     result.success(3)
+        // }
           "setDialConfStr"->{
 
               dialConfStr = (call.argument("text") as? String).toString();
